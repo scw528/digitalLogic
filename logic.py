@@ -10,7 +10,7 @@ class Connector :
         monitor:
         connects:
     """
-    def __init__(self, owner, name, activates=0, monitor=0) -> None:
+    def __init__(self, owner, name, activates=0, monitor=0) :
         self.value = None
         self.owner = owner
         self.name = name
@@ -18,7 +18,7 @@ class Connector :
         self.monitor = monitor
         self.connects = []
 
-    def connect(self, inputs) -> None:
+    def connect(self, inputs) :
         # ensure that inputs is a list
         if not isinstance(inputs, list):
             inputs = [inputs]
@@ -39,24 +39,28 @@ class Connector :
             # print(formattedJSON)
             print("Connector {0}-{1} set to {2}".format(self.owner.name, self.name, self.value))
         for con in self.connects:
+            if value == True:
+                value = 1
+            elif value == False:
+                value = 0
             con.set(value)
 
 class LogicCircuit :
-    def __init__(self, name) -> None:
+    def __init__(self, name) :
         self.name = name
     
     def evaluate(self):
         return
 
 class Gate(LogicCircuit) :
-    def __init__(self, name) -> None:
+    def __init__(self, name) :
         LogicCircuit.__init__(self, name)
         self.A = Connector(self, "A", activates=1)
         self.B = Connector(self, "B", activates=1)
         self.C = Connector(self, "C", monitor=1)
 
 class Not(LogicCircuit) :
-    def __init__(self, name) -> None :
+    def __init__(self, name)  :
         LogicCircuit.__init__(self, name)
         self.A = Connector(self, "A", activates=1)
         self.B = Connector(self, "B", monitor=1)
@@ -75,7 +79,7 @@ B             x        xx
 
 """
 class And(Gate) :
-    def __init__(self, name) -> None :
+    def __init__(self, name)  :
         Gate.__init__(self, name)
 
     def evaluate(self) :
@@ -94,7 +98,7 @@ B             xxxxxxxxxx
 
 """
 class Or(Gate):
-    def __init__(self, name) -> None :
+    def __init__(self, name)  :
         Gate.__init__(self, name)
 
     def evaluate(self):
@@ -128,7 +132,7 @@ class Xor(Gate):
         self.O1.C.connect([self.C])
 
 class HalfAdder(LogicCircuit) :
-    def __init__(self, name) -> None :
+    def __init__(self, name)  :
         LogicCircuit.__init__(self, name)
         self.A = Connector(self, "A", activates=1)
         self.B = Connector(self, "B", activates=1)
@@ -143,7 +147,7 @@ class HalfAdder(LogicCircuit) :
 
 # 2 half adders and 1 or
 class FullAdder(LogicCircuit) :
-    def __init__(self, name) -> None:
+    def __init__(self, name) :
         LogicCircuit.__init__(self, name)
         self.Cin = Connector(self, "Cin", activates=1, monitor=1)
         self.A = Connector(self, "A", activates=1, monitor=1)
@@ -161,7 +165,6 @@ class FullAdder(LogicCircuit) :
         self.H2.S.connect(self.S)
         self.H2.C.connect(self.O1.A)
         self.O1.C.connect(self.Cout)
-
     
 
 
