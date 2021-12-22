@@ -15,12 +15,41 @@ def sanitizeInput(a, b) -> bool :
     else :
         return True
 
-def multToString(fullAdders, andGates, numBits) :
+def twosCompliment(bitString) :
+    # to preform this, we must flip all the bits and add one. return the result
+    numBits = len(bitString)
+    # string to hold the flipped input bitString
+    flippedBitString = ""
+    # string to hold 1. This will be added to the flippedBitString
+    one = "0" * (numBits - 1)
+    one += "1"
+    # flip all the bits using our Not gate
+    bitList = [bit for bit in bitString]
+    notGates = {"N{0}".format(i): Not("N{0}".format(i)) for i in range(1, numBits + 1)}
+    
+    for key, value in notGates.items() :
+        index = int(key.replace('N',''))
+        value.A.set(int(bitList[index - 1]))
+    
+    for key, value in notGates.items() :
+        flippedBitString = flippedBitString + str(value.B.value)
+
+    twosCompliment = add(flippedBitString, one)
+    
+    return twosCompliment
+
+def test() :
+    n1 = Not('n1')
+    n1.B.monitor = 1
+    n1.A.set(0)
+
+def toString(fullAdders, andGates) :
     # output will hold the output bits in reverse order
     output = []
 
     # first and gate will always be the lowest bit (farthest right).
-    output.append(list(andGates.values())[0].C.value)
+    if bool(andGates) :
+        output.append(list(andGates.values())[0].C.value)
 
     for key, value in fullAdders.items() :
         index = int(key.replace('FA',''))
@@ -34,7 +63,7 @@ def multToString(fullAdders, andGates, numBits) :
     
     output.reverse()
     outputString = "".join(map(str, output))
-
+    
     return outputString
         
 
@@ -45,7 +74,7 @@ def add(a, b) -> None :
     fullAdders = {}
     # create the full adders
     for x in range(numBits):
-        name = "F{0}".format(x)
+        name = "FA{0}".format(x)
         fullAdders[name] = FullAdder(name)
     
     # connect the full adder's carry output to the input of the next full adder
@@ -64,9 +93,14 @@ def add(a, b) -> None :
         value.A.set(bit(a, position))
         value.B.set(bit(b, position))
 
-    # TODO: implement function to output the results
-    print("{0}{1}{2}{3}{4}".format(fullAdders['F3'].Cout.value, fullAdders['F3'].S.value,
-                                   fullAdders['F2'].S.value, fullAdders['F1'].S.value, fullAdders['F0'].S.value))
+    return toString(fullAdders, {})
+
+def subtract(a, b) -> None :
+    if sanitizeInput(a, b) :
+        numBits = len(b)
+
+    twosCompB = twosCompliment(b)
+    return add(a, twosCompB)
 
 def multiply(a, b) :
     if sanitizeInput(a, b) :
@@ -76,8 +110,8 @@ def multiply(a, b) :
     fullAdders = {"FA{0}".format(i): FullAdder("FA{0}".format(i)) for i in range(1, numBits*numBits - numBits + 1)}
     # create all and gates
     andGates = {"A{0}".format(i): And("A{0}".format(i)) for i in range(1, (numBits*numBits) + 1)}
-    
-    # configure output of A2 to len(andGates) + 1
+
+    # configure output of andGates A2 to len(andGates) + 1
     for index in range (2, len(andGates) + 1) :
         if (index <= numBits):
             list(andGates.values())[index - 1].C.connect(list(fullAdders.values())[index - 2].A)
@@ -85,9 +119,23 @@ def multiply(a, b) :
             list(andGates.values())[index - 1].C.connect(list(fullAdders.values())[index - numBits - 1].B)
 
     # firstInRow holds the indexes of the first FA in each row (right to left, top to bottom). Set these FA's Cin to 0
-    firstInRowIndexes = [4*i - 3 for i in range(1, (len(fullAdders)//numBits) + 1)]
+    ''' 
+        numBits   |   firstInRowIndexes
+        _______________________________
+            2     |     [1]
+            3     |     [1 ,4]
+            4     |     [1, 5, 9]
+    '''
+    firstInRowIndexes = [numBits*i - (numBits - 1) for i in range(1, (len(fullAdders)//numBits) + 1)]
     # hold the last row of FA's. numFA - numBits
-    lastRowIndexes = x = [i for i in range(len(fullAdders) - numBits + 1, len(fullAdders) + 1)]
+    '''
+        numBits   |   lastRowIndexes
+        _______________________________
+            2     |     [1, 2]
+            3     |     [4, 5, 6]
+            4     |     [9, 10, 11, 12]
+    '''
+    lastRowIndexes = [i for i in range(len(fullAdders) - numBits + 1, len(fullAdders) + 1)]
     
     # connect all the full adders
     for key, value in fullAdders.items() :
@@ -119,7 +167,7 @@ def multiply(a, b) :
 
             # connect FA(n-1) Cout to Fa(n) Cin
             value.Cout.connect(list(fullAdders.values())[index].Cin)
-
+    
     # list to hold all possile positions of an input bit
     inputBitBPositions = [i for i in range(numBits)]
 
@@ -137,9 +185,8 @@ def multiply(a, b) :
         value.A.set(bit(b, allBPositions[index - 1]))
         value.B.set(bit(a, allAPositions[index - 1]))
 
-    # TODO: implement function to output the results
-    print(multToString(fullAdders, andGates, numBits))
-        
+    # call function to output the results
+    return toString(fullAdders, andGates)
 
 def test2BitMult() :
     a1 = And("a1")
@@ -269,8 +316,8 @@ def test4BitMult() :
     a16.A.set(1)
     a16.B.set(1)
 
-    print("{0}{1}{2}{3}{4}{5}{6}{7}".format(fullAdders['FA12'].Cout.value, fullAdders['FA12'].S.value, fullAdders['FA11'].S.value,
-            fullAdders['FA10'].S.value, fullAdders['FA9'].S.value, fullAdders['FA5'].S.value, fullAdders['FA1'].S.value, andGates['A1'].C.value))
+    print("{0}{1}{2}{3}{4}{5}{6}{7}".format(fa12.Cout.value, fa12.S.value, fa11.S.value,
+            fa10.S.value, fa9.S.value, fa5.S.value, fa1.S.value, a1.C.value))
 
 
 

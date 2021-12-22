@@ -26,6 +26,7 @@ class Connector :
             self.connects.append(input)
 
     def set(self, value):
+        # There is a small bug that occurs with the below if statement commented out. We
         # uncommenting these lines will result in faster input. However, some of the values will not get set.
         if self.value == value:
             return
@@ -64,7 +65,13 @@ class Not(LogicCircuit) :
         self.B = Connector(self, "B")
     
     def evaluate(self) :
-        self.B.set(not self.A.value)
+        boolValue = self.A.value
+        if boolValue == True or boolValue == 1:
+            self.B.set(0)
+        elif boolValue == False or boolValue == 0:
+            self.B.set(1)
+        elif boolValue == None:
+            self.B.set(None)
 
 """
               xxxxxxxxx
@@ -128,11 +135,6 @@ class Xor(Gate):
         self.A1.C.connect([self.O1.A])
         self.A2.C.connect([self.O1.B])
         self.O1.C.connect([self.C])
-        self.values = {
-            'A' : self.A.value,
-            'B' : self.B.value,
-            'C' : self.O1.C.value,
-        }
 
 class HalfAdder(LogicCircuit) :
     def __init__(self, name)  :
@@ -168,13 +170,6 @@ class FullAdder(LogicCircuit) :
         self.H2.S.connect(self.S)
         self.H2.C.connect(self.O1.A)
         self.O1.C.connect(self.Cout)
-        self.values = {
-                'A' : self.A.value,
-                'B' : self.B.value,
-                'Cin' : self.Cin.value,
-                'S' : self.S.value,
-                'Cout' : self.Cout.value,
-        }
     
 
 
