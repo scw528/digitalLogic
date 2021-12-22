@@ -1,15 +1,5 @@
-import json
-
+# Connector will connect from a component's output, to the next component's input.
 class Connector :
-    """
-        Initialize a connector instance.
-        value:
-        owner:
-        name:
-        activates:
-        monitor:
-        connects:
-    """
     def __init__(self, owner, name, activates=0, monitor=0) :
         self.value = None
         self.owner = owner
