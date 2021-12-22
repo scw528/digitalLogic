@@ -18,8 +18,8 @@ class Connector :
     def set(self, value):
         # There is a small bug that occurs with the below if statement commented out. We
         # uncommenting these lines will result in faster input. However, some of the values will not get set.
-        if self.value == value:
-            return
+        # if self.value == value:
+        #     return
         self.value = value
         if self.activates:
             self.owner.evaluate()
