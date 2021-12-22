@@ -26,18 +26,16 @@ class Connector :
             self.connects.append(input)
 
     def set(self, value):
-        if self.value == value:
-            return
+        # uncommenting these lines will result in faster input. However, some of the values will not get set.
+        # if self.value == value:
+        #     return
         self.value = value
         if self.activates:
             self.owner.evaluate()
-        if self.monitor:
-            # connectorValues = {
-            #     self.owner.name+"-"+self.name: self.value
-            # }
-            # formattedJSON = json.dumps(connectorValues)
-            # print(formattedJSON)
-            print("Connector {0}-{1} set to {2}".format(self.owner.name, self.name, self.value))
+        if self.monitor and (self.value != None):
+            # set the new value of the values dict
+            # self.owner.values[self.name] = self.value
+            print("{0}-{1} set to {2}".format(self.owner.name, self.name, self.value))
         for con in self.connects:
             if value == True:
                 value = 1
@@ -57,13 +55,13 @@ class Gate(LogicCircuit) :
         LogicCircuit.__init__(self, name)
         self.A = Connector(self, "A", activates=1)
         self.B = Connector(self, "B", activates=1)
-        self.C = Connector(self, "C", monitor=1)
+        self.C = Connector(self, "C")
 
 class Not(LogicCircuit) :
     def __init__(self, name)  :
         LogicCircuit.__init__(self, name)
         self.A = Connector(self, "A", activates=1)
-        self.B = Connector(self, "B", monitor=1)
+        self.B = Connector(self, "B")
     
     def evaluate(self) :
         self.B.set(not self.A.value)
@@ -118,7 +116,7 @@ B             x xxxxxxxx
 class Xor(Gate):
     def __init__(self, name):
         Gate.__init__(self, name)
-        self.A1 = And("A1")  # See circuit drawing to follow connections
+        self.A1 = And("A1")
         self.A2 = And("A2")
         self.N1 = Not("N1")
         self.N2 = Not("N2")
@@ -130,14 +128,19 @@ class Xor(Gate):
         self.A1.C.connect([self.O1.A])
         self.A2.C.connect([self.O1.B])
         self.O1.C.connect([self.C])
+        self.values = {
+            'A' : self.A.value,
+            'B' : self.B.value,
+            'C' : self.O1.C.value,
+        }
 
 class HalfAdder(LogicCircuit) :
     def __init__(self, name)  :
         LogicCircuit.__init__(self, name)
         self.A = Connector(self, "A", activates=1)
         self.B = Connector(self, "B", activates=1)
-        self.S = Connector(self, "S", monitor=1)
-        self.C = Connector(self, "C", monitor=1)
+        self.S = Connector(self, "S")
+        self.C = Connector(self, "C")
         self.X1 = Xor("X1")
         self.A1 = And("A1")
         self.A.connect([self.X1.A, self.A1.A])
@@ -165,6 +168,13 @@ class FullAdder(LogicCircuit) :
         self.H2.S.connect(self.S)
         self.H2.C.connect(self.O1.A)
         self.O1.C.connect(self.Cout)
+        self.values = {
+                'A' : self.A.value,
+                'B' : self.B.value,
+                'Cin' : self.Cin.value,
+                'S' : self.S.value,
+                'Cout' : self.Cout.value,
+        }
     
 
 
