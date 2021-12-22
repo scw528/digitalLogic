@@ -16,21 +16,26 @@ def sanitizeInput(a, b) -> bool :
         return True
 
 def multToString(fullAdders, andGates, numBits) :
-    output = ""
-    for i in range(len(fullAdders), len(fullAdders) - numBits, -1) :
-        print(i)
-        pprint(vars(list(fullAdders.values())[i - 1].Cout))
-        pprint(vars(list(fullAdders.values())[i - 1].S))
-        if i == len(fullAdders) :
-            output = output + str(list(fullAdders.values())[i - 1].Cout.value)
-            output = output + str(list(fullAdders.values())[i - 1].S.value)
-        else :
-            output = output + str(list(fullAdders.values())[i - 1].S.value)
+    # output will hold the output bits in reverse order
+    output = []
+
+    # first and gate will always be the lowest bit (farthest right).
+    output.append(list(andGates.values())[0].C.value)
+
+    for key, value in fullAdders.items() :
+        index = int(key.replace('FA',''))
+        if len(value.S.connects) == 0:
+            # append FA.S.value to the output list if S does not connect to anything
+            output.append(value.S.value)
+            if index == len(fullAdders):
+                # append FA.Cout.value to the output list if it is the last FA
+                output.append(value.Cout.value)
+
     
-    print(output)
-    
-    output = output + str(list(andGates.values())[0].C.value)
-    return output
+    output.reverse()
+    outputString = "".join(map(str, output))
+
+    return outputString
         
 
 def add(a, b) -> None :
@@ -133,47 +138,10 @@ def multiply(a, b) :
         value.B.set(bit(a, allAPositions[index - 1]))
 
     # TODO: implement function to output the results
-    #multToString(fullAdders, andGates, numBits)
+    print(multToString(fullAdders, andGates, numBits))
+        
 
-    print(list(fullAdders.values())[numBits - 1].values)
-    # print("{0}.{1}".format(list(fullAdders.values())[numBits - 1].Cout.connects[0].owner.name, list(fullAdders.values())[numBits - 1].Cout.connects[0].name))
-    # print(list(fullAdders.values())[numBits - 1].A.value)
-    # print(list(fullAdders.values())[numBits - 1].B.value)
-    # print(list(fullAdders.values())[numBits - 1].Cin.value)
-    # print(list(fullAdders.values())[numBits - 1].S.value)
-    # print(list(fullAdders.values())[numBits - 1].Cout.value)
-
-    # print(list(fullAdders.values())[len(fullAdders) - (numBits - 1) - 2].name)
-    # print("{0}.{1}".format(list(fullAdders.values())[len(fullAdders) - (numBits - 1) - 2].Cout.connects[0].owner.name, list(fullAdders.values())[len(fullAdders) - (numBits - 1) - 2].Cout.connects[0].name))
-    # print(list(fullAdders.values())[len(fullAdders) - (numBits - 1) - 2].A.value)
-    # print(list(fullAdders.values())[len(fullAdders) - (numBits - 1) - 2].B.value)
-    # print(list(fullAdders.values())[len(fullAdders) - (numBits - 1) - 2].Cin.value)
-    # print(list(fullAdders.values())[len(fullAdders) - (numBits - 1) - 2].S.value)
-    # print(list(fullAdders.values())[len(fullAdders) - (numBits - 1) - 2].Cout.value)
-
-    # print(list(andGates.values())[len(andGates) - 1].name)
-    # print("{0}.{1}".format(list(andGates.values())[len(andGates) - 1].C.connects[0].owner.name, list(andGates.values())[len(andGates) - 1].C.connects[0].name))
-    # print(list(andGates.values())[len(andGates) - 1].A.value)
-    # print(list(andGates.values())[len(andGates) - 1].B.value)
-    # print(list(andGates.values())[len(andGates) - 1].C.value)
-
-
-
-    # print(list(fullAdders.values())[len(fullAdders) - 1].name)
-    # print(list(fullAdders.values())[len(fullAdders) - 1].A.connects)
-    # print(list(fullAdders.values())[len(fullAdders) - 1].A.value)
-    # print(list(fullAdders.values())[len(fullAdders) - 1].B.value)
-    # print(list(fullAdders.values())[len(fullAdders) - 1].Cin.value)
-    # print(list(fullAdders.values())[len(fullAdders) - 1].S.value)
-    # print(list(fullAdders.values())[len(fullAdders) - 1].Cout.value)
-
-    if numBits == 2:
-        print("{0}{1}{2}{3}".format(fullAdders['FA2'].Cout.value, fullAdders['FA2'].S.value, fullAdders['FA1'].S.value, andGates['A1'].C.value))
-    elif numBits == 4:
-        print("{0}{1}{2}{3}{4}{5}{6}{7}".format(fullAdders['FA12'].Cout.value, fullAdders['FA12'].S.value, fullAdders['FA11'].S.value,
-            fullAdders['FA10'].S.value, fullAdders['FA9'].S.value, fullAdders['FA5'].S.value, fullAdders['FA1'].S.value, andGates['A1'].C.value))
-
-def test2BitMult(a, b) :
+def test2BitMult() :
     a1 = And("a1")
     a2 = And("a2")
     a3 = And("a3")
@@ -201,11 +169,7 @@ def test2BitMult(a, b) :
     a4.A.set(1)
     a4.B.set(1)
 
-    print(fa2.Cout.value)
-    print(fa2.S.value)
-    print(fa1.S.value)
-    print(a1.C.value)
-    #print("{0}{1}{2}{3}".format(fa2.Cout.value, fa2.S.value, fa1.S.value, a1.C.value))
+    print("{0}{1}{2}{3}".format(fa2.Cout.value, fa2.S.value, fa1.S.value, a1.C.value))
 
 def test4BitMult() :
     a1 = And("a1")
@@ -305,8 +269,8 @@ def test4BitMult() :
     a16.A.set(1)
     a16.B.set(1)
 
-    print("{0}{1}{2}{3}{4}{5}".format(fa12.Cout.value, fa12.S.value, fa11.S.value,
-            fa10.S.value, fa9.S.value, a1.C.value))
+    print("{0}{1}{2}{3}{4}{5}{6}{7}".format(fullAdders['FA12'].Cout.value, fullAdders['FA12'].S.value, fullAdders['FA11'].S.value,
+            fullAdders['FA10'].S.value, fullAdders['FA9'].S.value, fullAdders['FA5'].S.value, fullAdders['FA1'].S.value, andGates['A1'].C.value))
 
 
 
