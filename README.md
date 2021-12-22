@@ -87,6 +87,6 @@ FA3-Cout set to 1
 '1010'
 ```
 
-**NOTE:** If input bit string > 2, gates will sometimes not be re-evaluated and therefore not set.
+**NOTE:** If input bit string length > 2, gates will sometimes not be re-evaluated and therefore not set.
 If you see 'None' in the output string, please uncomment lines 21,22 in logic.py. This will result 
 in much slower computation, but will yield the correct value. 
