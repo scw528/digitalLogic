@@ -16,10 +16,9 @@ class Connector :
             self.connects.append(input)
 
     def set(self, value):
-        # There is a small bug that occurs with the below if statement commented out. We
-        # uncommenting these lines will result in faster input. However, some of the values will not get set.
-        # if self.value == value:
-        #     return
+        # commenting these lines will result in slower computation. However, it fixes the issue of some values not getting set.
+        if self.value == value:
+            return
         self.value = value
         if self.activates:
             self.owner.evaluate()
