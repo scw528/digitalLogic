@@ -4,7 +4,7 @@
 Python Implementation of digital logic gates and some of their applications.
 
 ### Applications:
-The following applications can be computed for bit strings of length n
+The following applications can be computed for bit strings of length n. You can find diagrams for the implemented circuits under diagrams.
 - Addition
 - Subtraction
 - Multiplication
