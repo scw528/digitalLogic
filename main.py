@@ -12,25 +12,22 @@ def add(a, b) -> None :
     if sanitizeInput(a, b) :
         numBits = len(b) 
 
-    fullAdders = {}
     # create the full adders
-    for x in range(numBits):
-        name = "FA{0}".format(x)
-        fullAdders[name] = FullAdder(name)
+    fullAdders = {"FA{0}".format(i): FullAdder("FA{0}".format(i)) for i in range(1, numBits + 1)}
     
     # connect the full adder's carry output to the input of the next full adder
     for key, value in fullAdders.items():
-        index = int(key[-1])
-        if (index < len(fullAdders) - 1) :
-            value.Cout.connect(list(fullAdders.values())[index + 1].Cin)
+        index = int(key.replace('FA',''))
+        if (index != len(fullAdders)) :
+            value.Cout.connect(list(fullAdders.values())[index].Cin)
     
     # set the first full adder's carry input to 0
     list(fullAdders.values())[0].Cin.set(0)
 
     # set each full adders input's to the corresponding bit
     for key, value in fullAdders.items():
-        index = int(key[-1])
-        position = (len(fullAdders) - 1) - index
+        index = int(key.replace('FA',''))
+        position = (len(fullAdders) - 1) - (index - 1)
         value.A.set(bit(a, position))
         value.B.set(bit(b, position))
 
